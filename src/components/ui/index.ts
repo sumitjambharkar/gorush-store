@@ -26,3 +26,4 @@ export {
 } from "./Design";
 export type { IconName } from "./Design";
 export { VegMark } from "./VegMark";
+export { MobileChangeForm } from "./MobileChange";

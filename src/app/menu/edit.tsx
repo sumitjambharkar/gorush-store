@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { View, Text, StyleSheet, Alert, ScrollView } from "react-native";
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
+import { goBack } from "@/utils/nav";
 import { useTheme } from "@/theme";
 import {
   ScreenContainer,
@@ -82,7 +83,7 @@ export default function EditMenuItem() {
     try {
       if (editing) await menuApi.update(id!, body);
       else await menuApi.create(body);
-      router.back();
+      goBack();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Couldn't save the item");
     } finally {
@@ -100,7 +101,7 @@ export default function EditMenuItem() {
           setDeleting(true);
           try {
             await menuApi.remove(id!);
-            router.back();
+            goBack();
           } catch (err) {
             setError(err instanceof ApiError ? err.message : "Couldn't delete the item");
           } finally {
@@ -112,7 +113,7 @@ export default function EditMenuItem() {
 
   return (
     <ScreenContainer edges={["top", "bottom"]} padded={false} bg={colors.surface}>
-      <ScreenHeader title={editing ? "Edit item" : "Add item"} onBack={() => router.back()} />
+      <ScreenHeader title={editing ? "Edit item" : "Add item"} onBack={() => goBack()} />
 
       {loaded ? (
         <KeyboardScroll bottomOffset={FOOTER_OFFSET} contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 24, gap: spacing.lg }}>

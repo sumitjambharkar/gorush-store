@@ -102,7 +102,8 @@ export default function Store() {
             meta={`${merchant.openingHours.open} – ${merchant.openingHours.close}`}
             onPress={() => router.push({ pathname: "/setup", params: { mode: "edit" } })}
           />
-          <ListRow icon="phone" title="Store mobile" meta={`+91 ${merchant.mobile}`} />
+          <ListRow icon="person-outline" title="Owner profile" meta={merchant.ownerName || undefined} onPress={() => router.push("/account/edit")} />
+          <ListRow icon="phone" title="Login mobile" meta={`+91 ${merchant.mobile}`} onPress={() => router.push("/account/mobile")} />
           <ListRow icon="logout" title="Log out" danger onPress={logout} />
         </ListGroup>
       </ScrollView>

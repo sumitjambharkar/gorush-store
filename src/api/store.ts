@@ -20,3 +20,13 @@ export const setOpen = (isOpen: boolean) => apiRequest<R>("/api/merchant/me/open
 
 export const updateSettings = (body: Partial<Merchant["settings"]>) =>
   apiRequest<R>("/api/merchant/me/settings", { method: "PATCH", body });
+
+// Change the store's login mobile number — the OTP goes to the new number.
+export const requestMobileOtp = (mobile: string) =>
+  apiRequest<{ success: true; data: { mobile: string; devOtp?: string } }>("/api/merchant/me/mobile/request-otp", {
+    method: "POST",
+    body: { mobile },
+  });
+
+export const verifyMobileOtp = (mobile: string, otp: string) =>
+  apiRequest<R>("/api/merchant/me/mobile/verify", { method: "POST", body: { mobile, otp } });

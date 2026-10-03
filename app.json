@@ -15,7 +15,15 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.gorush.merchant"
+      "package": "com.gorush.merchant",
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
       "output": "static",
@@ -54,6 +62,12 @@
     },
     "ios": {
       "bundleIdentifier": "com.gorush.merchant"
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "14ba4e7b-d683-4a1d-abe9-1993aa6aac2d"
+      }
     }
   }
 }

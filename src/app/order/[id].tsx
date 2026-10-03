@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { View, Text, ScrollView, StyleSheet, Alert, Linking, ActivityIndicator } from "react-native";
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
+import { goBack } from "@/utils/nav";
 import { useTheme } from "@/theme";
 import { ORDER_STATUS_META } from "@/theme/colors";
 import { ScreenContainer, Avatar, Banner, BottomBar, Button, Icon, IconButton, IconTile, ScreenHeader, SelectChip, StatusPill, VegMark } from "@/components/ui";
@@ -80,7 +81,7 @@ export default function OrderDetail() {
   if (!order) {
     return (
       <ScreenContainer bg={colors.surface}>
-        <ScreenHeader title="Order" onBack={() => router.back()} style={{ paddingHorizontal: 0 }} />
+        <ScreenHeader title="Order" onBack={() => goBack()} style={{ paddingHorizontal: 0 }} />
         {error ? <Banner tone="danger" title={error} /> : <ActivityIndicator color={colors.primary} style={{ marginTop: 40 }} />}
       </ScreenContainer>
     );
@@ -96,7 +97,7 @@ export default function OrderDetail() {
 
   return (
     <ScreenContainer edges={["top"]} padded={false} bg={colors.surface}>
-      <ScreenHeader onBack={() => router.back()} right={<StatusPill label={meta?.label ?? order.status} tone={meta?.tone ?? "neutral"} />} />
+      <ScreenHeader onBack={() => goBack()} right={<StatusPill label={meta?.label ?? order.status} tone={meta?.tone ?? "neutral"} />} />
       <View style={{ paddingHorizontal: 20, marginTop: -8, marginBottom: 10 }}>
         <Text style={[type.screenTitle, { color: colors.textPrimary }]}>Order #{order.orderNumber}</Text>
         <Text style={[type.meta, { color: colors.textTertiary }]}>

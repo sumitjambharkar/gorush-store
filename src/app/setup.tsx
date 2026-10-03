@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
+import { goBack } from "@/utils/nav";
 import * as Location from "expo-location";
 import { useTheme } from "@/theme";
 import {
@@ -105,7 +106,7 @@ export default function StoreSetup() {
         openingHours: { open, close },
       });
       setMerchant(res.data);
-      if (editing) router.back();
+      if (editing) goBack();
       else router.replace("/(tabs)");
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Couldn't save your store");
@@ -120,7 +121,7 @@ export default function StoreSetup() {
         title={editing ? "Edit store" : "Set up your store"}
         onBack={
           editing
-            ? () => router.back()
+            ? () => goBack()
             : async () => {
                 await signOut();
                 router.replace("/(auth)/login");
