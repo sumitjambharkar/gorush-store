@@ -4,6 +4,7 @@ import { router } from "expo-router";
 import { useTheme } from "@/theme";
 import { ScreenContainer, Button, TextField, KeyboardScroll } from "@/components/ui";
 import { authApi, ApiError } from "@/api";
+import { RESEND_SECONDS, retryAfterSeconds } from "@/utils/otp";
 
 export default function Login() {
   const { colors, type, spacing, scheme } = useTheme();
@@ -19,8 +20,17 @@ export default function Login() {
     setError("");
     try {
       const res = await authApi.sendOtp(mobile);
-      router.push({ pathname: "/(auth)/otp", params: { mobile, devOtp: res.data.devOtp ?? "" } });
+      router.push({
+        pathname: "/(auth)/otp",
+        params: { mobile, devOtp: res.data.devOtp ?? "", resend: String(res.data.resendAfterSeconds ?? RESEND_SECONDS) },
+      });
     } catch (err) {
+      // A code was already sent in the last 3 minutes and is still valid — use it.
+      const wait = retryAfterSeconds(err);
+      if (wait) {
+        router.push({ pathname: "/(auth)/otp", params: { mobile, devOtp: "", resend: String(wait) } });
+        return;
+      }
       setError(err instanceof ApiError ? err.message : "Failed to send OTP");
     } finally {
       setLoading(false);

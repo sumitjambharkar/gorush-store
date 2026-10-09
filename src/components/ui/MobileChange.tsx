@@ -5,6 +5,7 @@ import { Banner } from "./Banner";
 import { Button } from "./Button";
 import { OtpInput } from "./OtpInput";
 import { TextField } from "./TextField";
+import { OTP_LENGTH, RESEND_SECONDS, formatCountdown, retryAfterSeconds } from "@/utils/otp";
 
 /*
  * Two-step "change mobile number" form: enter the new number → enter the OTP
@@ -18,7 +19,7 @@ export function MobileChangeForm({
   onDone,
 }: {
   currentMobile?: string;
-  request: (mobile: string) => Promise<{ devOtp?: string }>;
+  request: (mobile: string) => Promise<{ devOtp?: string; resendAfterSeconds?: number }>;
   verify: (mobile: string, otp: string) => Promise<void>;
   onDone: () => void;
 }) {
@@ -48,20 +49,22 @@ export function MobileChangeForm({
       setDevOtp(res.devOtp ?? "");
       setOtp("");
       setStep("otp");
-      setSeconds(30);
+      setSeconds(res.resendAfterSeconds ?? RESEND_SECONDS);
     } catch (err) {
+      const wait = retryAfterSeconds(err);
+      if (wait) setSeconds(wait);
       setError(err instanceof Error ? err.message : "Couldn't send the OTP");
     } finally {
       setBusy(false);
     }
   };
 
-  const confirm = async () => {
-    if (otp.length !== 4 || busy) return;
+  const confirm = async (code: string = otp) => {
+    if (code.length !== OTP_LENGTH || busy) return;
     setBusy(true);
     setError("");
     try {
-      await verify(mobile, otp);
+      await verify(mobile, code);
       onDone();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Couldn't verify the OTP");
@@ -87,26 +90,31 @@ export function MobileChangeForm({
           error={mobile.length === 10 && mobile === currentMobile ? "That's your current number" : error}
           autoFocus
         />
-        <Text style={[type.meta, { color: colors.textTertiary }]}>{"We'll send a 4-digit code to the new number to confirm it's yours."}</Text>
-        <Button label="Send OTP" onPress={send} disabled={!valid} loading={busy} />
+        <Text style={[type.meta, { color: colors.textTertiary }]}>{"We'll send a 6-digit code to the new number to confirm it's yours."}</Text>
+        <Button
+          label={seconds > 0 ? `Send OTP in ${formatCountdown(seconds)}` : "Send OTP"}
+          onPress={send}
+          disabled={!valid || seconds > 0}
+          loading={busy}
+        />
       </View>
     );
   }
 
   return (
     <View style={{ gap: spacing.lg }}>
-      <Text style={[type.caption, { fontSize: 14, color: colors.textSecondary }]}>Enter the 4-digit code sent to +91 {mobile}</Text>
-      {devOtp ? <Banner tone="info" title="Dev mode" description={`Your OTP is ${devOtp} (no SMS gateway configured yet).`} /> : null}
-      <OtpInput length={4} value={otp} onChange={setOtp} />
+      <Text style={[type.caption, { fontSize: 14, color: colors.textSecondary }]}>Enter the 6-digit code sent to +91 {mobile}</Text>
+      {devOtp ? <Banner tone="info" title="Dev mode" description={`Your OTP is ${devOtp} (SMS isn't configured on this server).`} /> : null}
+      <OtpInput length={OTP_LENGTH} value={otp} onChange={setOtp} onComplete={(code) => confirm(code)} />
       {error ? <Text style={[type.caption, { color: colors.dangerText }]}>{error}</Text> : null}
-      <Button label="Verify & update number" onPress={confirm} disabled={otp.length !== 4} loading={busy} />
+      <Button label="Verify & update number" onPress={() => confirm()} disabled={otp.length !== OTP_LENGTH} loading={busy} />
       <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
         <Pressable onPress={() => { setStep("number"); setError(""); }} hitSlop={8}>
           <Text style={[type.bodyMedium, { color: colors.primary }]}>Change number</Text>
         </Pressable>
         <Pressable onPress={send} disabled={seconds > 0 || busy} hitSlop={8}>
           <Text style={[type.bodyMedium, { color: seconds > 0 ? colors.textTertiary : colors.primary }]}>
-            {seconds > 0 ? `Resend in ${seconds}s` : "Resend OTP"}
+            {seconds > 0 ? `Resend in ${formatCountdown(seconds)}` : "Resend OTP"}
           </Text>
         </Pressable>
       </View>

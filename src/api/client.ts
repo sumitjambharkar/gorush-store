@@ -21,9 +21,14 @@ export async function clearToken(): Promise<void> {
 
 export class ApiError extends Error {
   status: number;
-  constructor(message: string, status: number) {
+  code?: string;
+  /** Full error body from the server (e.g. retryAfterSeconds). */
+  data?: Record<string, any>;
+  constructor(message: string, status: number, code?: string, data?: Record<string, any>) {
     super(message);
     this.status = status;
+    this.code = code;
+    this.data = data;
   }
 }
 
@@ -57,7 +62,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
   const json = await response.json().catch(() => ({}));
 
   if (!response.ok || json.success === false) {
-    throw new ApiError(json.message || "Something went wrong", response.status);
+    throw new ApiError(json.message || "Something went wrong", response.status, json.code, json);
   }
 
   return json as T;

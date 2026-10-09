@@ -1,76 +1,99 @@
 import React, { useRef, useState } from "react";
-import { View, TextInput, StyleSheet, NativeSyntheticEvent, TextInputKeyPressEventData } from "react-native";
+import { View, Text, TextInput, Pressable, StyleSheet, Platform } from "react-native";
 import { useTheme } from "@/theme";
 
 interface OtpInputProps {
   length?: number;
   value: string;
   onChange: (value: string) => void;
+  /** Called once all digits are in (typed, pasted or auto-filled from the SMS). */
+  onComplete?: (code: string) => void;
   autoFocus?: boolean;
+  /**
+   * Offer the code from the incoming SMS (iOS keyboard suggestion, Android
+   * autofill). Turn off for codes that don't arrive by SMS (delivery PINs).
+   */
+  smsAutofill?: boolean;
 }
 
-export function OtpInput({ length = 4, value, onChange, autoFocus = true }: OtpInputProps) {
-  const { colors, radii, type, spacing } = useTheme();
-  const inputs = useRef<Array<TextInput | null>>([]);
-  const [focusedIndex, setFocusedIndex] = useState(0);
+/*
+ * One real (invisible) TextInput behind the boxes. A single field is what the
+ * OS needs to auto-fill / paste a whole code — separate one-digit inputs drop
+ * all but the first digit.
+ */
+export function OtpInput({ length = 6, value, onChange, onComplete, autoFocus = true, smsAutofill = true }: OtpInputProps) {
+  const { colors, radii, type } = useTheme();
+  const input = useRef<TextInput>(null);
+  const [focused, setFocused] = useState(false);
 
-  const digits = value.split("").concat(Array(length).fill("")).slice(0, length);
-
-  const setDigit = (index: number, digit: string) => {
-    const next = digits.slice();
-    next[index] = digit;
-    const joined = next.join("").slice(0, length);
-    onChange(joined);
-
-    if (digit && index < length - 1) {
-      inputs.current[index + 1]?.focus();
-    }
+  const handleChange = (text: string) => {
+    const code = text.replace(/[^0-9]/g, "").slice(0, length);
+    onChange(code);
+    if (code.length === length && code !== value) onComplete?.(code);
   };
 
-  const handleKeyPress = (index: number, e: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
-    if (e.nativeEvent.key === "Backspace" && !digits[index] && index > 0) {
-      inputs.current[index - 1]?.focus();
-    }
-  };
+  const activeIndex = Math.min(value.length, length - 1);
 
   return (
-    <View style={styles.row}>
-      {digits.map((digit, index) => (
-        <TextInput
-          key={index}
-          ref={(r) => {
-            inputs.current[index] = r;
-          }}
-          value={digit}
-          onChangeText={(t) => setDigit(index, t.replace(/[^0-9]/g, "").slice(-1))}
-          onKeyPress={(e) => handleKeyPress(index, e)}
-          onFocus={() => setFocusedIndex(index)}
-          keyboardType="number-pad"
-          maxLength={1}
-          autoFocus={autoFocus && index === 0}
-          style={[
-            type.h2,
-            styles.box,
-            {
-              borderRadius: radii.md,
-              borderColor: focusedIndex === index ? colors.primary : colors.border,
-              color: colors.textPrimary,
-              backgroundColor: colors.surface,
-              marginRight: index === length - 1 ? 0 : spacing.md,
-            },
-          ]}
-        />
-      ))}
-    </View>
+    <Pressable onPress={() => input.current?.focus()} style={styles.row} accessibilityLabel={`${length}-digit code`}>
+      {Array.from({ length }, (_, i) => {
+        const digit = value[i] ?? "";
+        const active = focused && i === activeIndex;
+        return (
+          <View
+            key={i}
+            style={[
+              styles.box,
+              {
+                borderRadius: radii.md,
+                borderColor: active ? colors.primary : digit ? colors.textSecondary : colors.border,
+                backgroundColor: colors.surface,
+              },
+            ]}
+          >
+            <Text style={[type.h2, { color: colors.textPrimary }]}>{digit}</Text>
+          </View>
+        );
+      })}
+
+      <TextInput
+        ref={input}
+        value={value}
+        onChangeText={handleChange}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        maxLength={length}
+        keyboardType="number-pad"
+        autoFocus={autoFocus}
+        caretHidden
+        contextMenuHidden={false}
+        // SMS code auto-fill: iOS suggests it above the keyboard, Android
+        // offers it via autofill / the keyboard's suggestion strip.
+        textContentType={smsAutofill ? "oneTimeCode" : "none"}
+        autoComplete={smsAutofill ? (Platform.OS === "android" ? "sms-otp" : "one-time-code") : "off"}
+        importantForAutofill={smsAutofill ? "yes" : "no"}
+        style={styles.hiddenInput}
+      />
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: "row" },
+  row: { flexDirection: "row", justifyContent: "center", gap: 8, alignSelf: "stretch" },
   box: {
-    width: 56,
-    height: 64,
+    flex: 1,
+    maxWidth: 56,
+    height: 58,
     borderWidth: 1.5,
-    textAlign: "center",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  // Covers the boxes so taps / long-press paste land on it; nearly invisible
+  // (fully transparent inputs can lose autofill on some Android versions).
+  hiddenInput: {
+    ...StyleSheet.absoluteFill,
+    opacity: 0.015,
+    color: "transparent",
+    fontSize: 1,
   },
 });

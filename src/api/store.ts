@@ -23,7 +23,7 @@ export const updateSettings = (body: Partial<Merchant["settings"]>) =>
 
 // Change the store's login mobile number — the OTP goes to the new number.
 export const requestMobileOtp = (mobile: string) =>
-  apiRequest<{ success: true; data: { mobile: string; devOtp?: string } }>("/api/merchant/me/mobile/request-otp", {
+  apiRequest<{ success: true; data: { mobile: string; devOtp?: string; resendAfterSeconds?: number } }>("/api/merchant/me/mobile/request-otp", {
     method: "POST",
     body: { mobile },
   });

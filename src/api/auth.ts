@@ -2,7 +2,7 @@ import { apiRequest, setToken, clearToken } from "./client";
 import { Merchant } from "@/types";
 
 export function sendOtp(mobile: string) {
-  return apiRequest<{ success: true; data: { mobile: string; isNewMerchant: boolean; devOtp?: string } }>(
+  return apiRequest<{ success: true; data: { mobile: string; isNewMerchant: boolean; devOtp?: string; expiresInSeconds?: number; resendAfterSeconds?: number } }>(
     "/api/merchant/auth/send-otp",
     { method: "POST", body: { mobile }, auth: false }
   );
