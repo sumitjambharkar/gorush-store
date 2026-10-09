@@ -40,19 +40,21 @@ export default function Launch() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Same lockup as the native splash, so the hand-off is seamless.
   return (
-    <View style={[styles.container, { backgroundColor: brand.orange }]}>
-      <Image source={require("../../assets/images/logo-tile.png")} style={styles.tile} />
-      <Image source={require("../../assets/images/wordmark-splash.png")} style={styles.wordmark} resizeMode="contain" />
-      <Text style={styles.tag}>STORE</Text>
-      <ActivityIndicator color="#FFFFFF" style={{ marginTop: 32 }} />
+    <View style={styles.container}>
+      <View style={styles.center}>
+        <Image source={require("../../assets/images/store-splash-lockup.png")} style={styles.lockup} resizeMode="contain" />
+        <ActivityIndicator color={brand.orange} style={{ marginTop: 36 }} />
+      </View>
+      <Text style={styles.tagline}>Orders in. Pickups out.</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: "center", justifyContent: "center" },
-  tile: { width: 132, height: 132 },
-  wordmark: { width: 220, height: (220 * 126) / 906, marginTop: 28 },
-  tag: { color: brand.ink, fontSize: 14, fontWeight: "700", letterSpacing: 6, marginTop: 18 },
+  container: { flex: 1, backgroundColor: "#FFFFFF", alignItems: "center", paddingBottom: 56 },
+  center: { flex: 1, alignItems: "center", justifyContent: "center" },
+  lockup: { width: 220, height: (220 * 713) / 879 },
+  tagline: { color: brand.ink, fontSize: 16, fontWeight: "500" },
 });
