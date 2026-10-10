@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { goBack } from "@/utils/nav";
 import * as Location from "expo-location";
+import { ensurePermission } from "@/utils/permissions";
 import { useTheme } from "@/theme";
 import {
   ScreenContainer,
@@ -60,11 +61,13 @@ export default function StoreSetup() {
     setLocating(true);
     setError("");
     try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        setError("Location access is needed to pin your store for delivery partners.");
-        return;
-      }
+      const allowed = await ensurePermission({
+        get: Location.getForegroundPermissionsAsync,
+        request: Location.requestForegroundPermissionsAsync,
+        title: "Location access needed",
+        reason: "Your store's location is used to send delivery partners to the right place.",
+      });
+      if (!allowed) return;
       const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
       const c = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
       setCoords(c);

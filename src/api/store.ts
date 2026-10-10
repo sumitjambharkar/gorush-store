@@ -30,3 +30,10 @@ export const requestMobileOtp = (mobile: string) =>
 
 export const verifyMobileOtp = (mobile: string, otp: string) =>
   apiRequest<R>("/api/merchant/me/mobile/verify", { method: "POST", body: { mobile, otp } });
+
+// This phone's Expo push token — loud new-order alerts when the app is closed / locked.
+export const registerPushToken = (token: string) =>
+  apiRequest<{ success: true }>("/api/merchant/me/push-token", { method: "POST", body: { token } });
+
+export const removePushToken = (token: string) =>
+  apiRequest<{ success: true }>("/api/merchant/me/push-token", { method: "DELETE", body: { token } });

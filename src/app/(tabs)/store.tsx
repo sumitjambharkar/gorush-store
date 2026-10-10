@@ -95,6 +95,7 @@ export default function Store() {
         </ListGroup>
 
         <ListGroup>
+          <ListRow icon="volume-up" title="Order alert sound" onPress={() => router.push("/alert-setup")} />
           <ListRow icon="edit" title="Store details & address" onPress={() => router.push({ pathname: "/setup", params: { mode: "edit" } })} />
           <ListRow
             icon="schedule"
