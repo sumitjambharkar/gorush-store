@@ -11,12 +11,22 @@ export async function getToken(): Promise<string | null> {
   return SecureStore.getItemAsync(TOKEN_KEY);
 }
 
+// Notified after login / logout (the socket reconnects with the new token).
+const tokenListeners = new Set<() => void>();
+
+export function onTokenChange(listener: () => void): () => void {
+  tokenListeners.add(listener);
+  return () => tokenListeners.delete(listener);
+}
+
 export async function setToken(token: string): Promise<void> {
   await SecureStore.setItemAsync(TOKEN_KEY, token);
+  tokenListeners.forEach((listener) => listener());
 }
 
 export async function clearToken(): Promise<void> {
   await SecureStore.deleteItemAsync(TOKEN_KEY);
+  tokenListeners.forEach((listener) => listener());
 }
 
 export class ApiError extends Error {
