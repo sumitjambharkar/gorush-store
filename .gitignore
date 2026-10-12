@@ -45,3 +45,5 @@ example
 # secrets / per-machine config — EAS builds get these from EAS environment variables
 .env
 google-services.json
+.env.*
+!.env.example
