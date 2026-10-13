@@ -72,7 +72,7 @@ export default function Otp() {
           </Text>
         </View>
 
-        {devOtp ? <Banner tone="info" title="Dev mode" description={`Your OTP is ${devOtp} (SMS isn't configured on this server).`} /> : null}
+        {devOtp ? <Banner tone="info" title="Dev mode" description={`Your OTP is ${devOtp} (development server — no SMS sent).`} /> : null}
 
         <OtpInput length={OTP_LENGTH} value={otp} onChange={setOtp} onComplete={(code) => handleVerify(code)} />
 

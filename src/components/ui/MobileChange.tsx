@@ -104,7 +104,7 @@ export function MobileChangeForm({
   return (
     <View style={{ gap: spacing.lg }}>
       <Text style={[type.caption, { fontSize: 14, color: colors.textSecondary }]}>Enter the 6-digit code sent to +91 {mobile}</Text>
-      {devOtp ? <Banner tone="info" title="Dev mode" description={`Your OTP is ${devOtp} (SMS isn't configured on this server).`} /> : null}
+      {devOtp ? <Banner tone="info" title="Dev mode" description={`Your OTP is ${devOtp} (development server — no SMS sent).`} /> : null}
       <OtpInput length={OTP_LENGTH} value={otp} onChange={setOtp} onComplete={(code) => confirm(code)} />
       {error ? <Text style={[type.caption, { color: colors.dangerText }]}>{error}</Text> : null}
       <Button label="Verify & update number" onPress={() => confirm()} disabled={otp.length !== OTP_LENGTH} loading={busy} />
